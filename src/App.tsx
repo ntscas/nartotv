@@ -358,13 +358,13 @@ export default function App() {
 
 
               {/* TWO COLUMN GRID FOR BROWSE */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-6 gap-y-2">
                 
                 {/* COLUMN A: WEB VIEW IFRAME (2/3 width) */}
-                <div className={`lg:col-span-2 flex flex-col gap-3 transition-all duration-300 ${
+                <div className={`lg:col-span-2 flex flex-col gap-2 transition-all duration-300 ${
                   isViewerSticky 
                     ? 'fixed top-12 bottom-0 left-0 right-0 z-40 bg-[#09090b] p-0 gap-0' 
-                    : 'sticky top-[48px] md:relative md:top-auto z-30 bg-[#09090b] pb-2'
+                    : 'sticky top-[48px] z-30 bg-[#09090b] pb-0 self-start'
                 }`}>
                   {!isViewerSticky && (
                     <div className="flex items-center justify-between px-4 sm:px-0">
@@ -380,7 +380,7 @@ export default function App() {
                   <div className={`bg-zinc-950 overflow-hidden shadow-2xl relative w-full flex flex-col ${
                     isViewerSticky 
                       ? 'h-full rounded-none border-none' 
-                      : 'rounded-2xl border border-zinc-800/80 h-[320px] sm:h-[450px] md:h-[650px] lg:h-[750px] xl:h-[800px]'
+                      : 'rounded-2xl border border-zinc-800/80 h-[420px] sm:h-[580px] md:h-[780px] lg:h-[880px] xl:h-[980px]'
                   }`}>
                     
                     {/* TVWiKi AD CROPPING TOOLBAR (ONLY FOR TVWIKI & VISIBLE AS SLIM BAR) */}
@@ -440,26 +440,7 @@ export default function App() {
                     )}
                   </div>
 
-                  {/* QUICK ACCESS BUTTONS */}
-                  {!isViewerSticky && (
-                    <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-zinc-300">동작이 원활하지 않으신가요?</h4>
-                        <p className="text-[11px] text-zinc-400 leading-relaxed">
-                          모바일이나 PC 브라우저의 보안 정책으로 인해 페이지 내 프레임 로드가 차단되는 경우가 있습니다. 이 경우 PWA를 설치하여 실행하거나 바로가기로 실행하시면 차단 없이 완벽하게 동작합니다!
-                        </p>
-                      </div>
-                      <a 
-                        href="https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2.5 rounded-lg border border-zinc-700/80 text-xs transition-all flex-shrink-0"
-                      >
-                        <span>나토드라마 바로 연결하기</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  )}
+
                 </div>
 
                 {/* COLUMN B: QUICK NAVIGATION / TRENDING / WATCHLIST SNIPPET (1/3 width) */}
@@ -831,7 +812,7 @@ export default function App() {
       </main>
 
       {/* FOOTER SECTION */}
-      <footer className={`bg-zinc-950 border-t border-zinc-900 py-8 text-center text-zinc-600 text-xs mt-12 ${isViewerSticky ? 'hidden md:block' : 'block'}`}>
+      <footer className={`bg-zinc-950 border-t border-zinc-900 py-8 text-center text-zinc-600 text-xs mt-4 ${isViewerSticky ? 'hidden md:block' : 'block'}`}>
         <div className="max-w-7xl mx-auto px-4 space-y-3">
           <p className="font-semibold tracking-wider text-zinc-500">OTT 프리미엄 웹 뷰어</p>
           <p className="max-w-md mx-auto leading-relaxed text-zinc-600">
