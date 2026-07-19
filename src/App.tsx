@@ -104,25 +104,6 @@ export default function App() {
     }
   }, []);
 
-  // Handle auto-sticky full screen viewer on mobile scroll
-  useEffect(() => {
-    // If already sticky, do not run scroll check to prevent layout change feedback loops (flickering)
-    if (isViewerSticky) return;
-
-    const handleScroll = () => {
-      // Only run on mobile viewports (< 768px)
-      if (window.innerWidth >= 768) return;
-
-      // When the user scrolls past 100px on mobile, trigger full screen mode automatically
-      if (window.scrollY > 100) {
-        setIsViewerSticky(true);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isViewerSticky]);
-
   // Reset viewer sticky state when tab changes
   useEffect(() => {
     setIsViewerSticky(false);
