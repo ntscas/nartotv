@@ -35,55 +35,26 @@ interface WatchlistItem {
   url: string;
 }
 
-// Prefilled trending dramas for quick deep-linking
-const TRENDING_DRAMAS = [
-  {
-    id: '1',
-    title: '선재 업고 튀어 (Lovely Runner)',
-    genre: '로맨스 / 판타지 / 타임슬립',
-    stars: '4.9',
-    episodes: '16부작',
-    biliTvUrl: 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=선재업고튀어',
-    desc: '임솔이 최애 선재를 구하기 위해 2008년으로 타임슬립하며 벌어지는 판타지 로맨스 드라마'
-  },
-  {
-    id: '2',
-    title: '눈물의 여왕 (Queen of Tears)',
-    genre: '로맨스 / 휴먼 / 코미디',
-    stars: '4.8',
-    episodes: '16부작',
-    biliTvUrl: 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=눈물의여왕',
-    desc: '퀸즈 그룹 재벌 3세 홍해인과 용두리 이장 아들 백현우의 아찔한 위기와 기적 같은 로맨스'
-  },
-  {
-    id: '3',
-    title: '오징어 게임 시즌2 (Squid Game 2)',
-    genre: '스릴러 / 서바이벌 / 액션',
-    stars: '4.7',
-    episodes: '6부작',
-    biliTvUrl: 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=오징어게임',
-    desc: '다시 시작된 생존 서바이벌. 456억 원의 상금을 둘러싸고 벌어지는 기훈의 복수와 극한 대결'
-  },
-  {
-    id: '4',
-    title: '더 글로리 (The Glory)',
-    genre: '복수 / 스릴러 / 드라마',
-    stars: '4.9',
-    episodes: '16부작',
-    biliTvUrl: 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=더글로리',
-    desc: '유년 시절 폭력으로 영혼까지 부서진 한 여자가 온 생을 걸어 치밀하게 준비한 처절한 복수극'
-  }
-];
-
 export default function App() {
   const defaultUrl = 'https://narto-drama.com/?lang=ko-KR';
   const [currentUrl, setCurrentUrl] = useState(defaultUrl);
-  const [tvWikiOffset, setTvWikiOffset] = useState<number>(180); // Default 180px
+  const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<'browse' | 'watchlist'>('browse');
   const [isViewerSticky, setIsViewerSticky] = useState(false);
   const isTvWiki = currentUrl.includes('tvwiki.store');
   const [iframeLoading, setIframeLoading] = useState(true);
   const [showSlowWarning, setShowSlowWarning] = useState(false);
+
+  // Monitor window resize to detect mobile viewport
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setIframeLoading(true);
@@ -113,7 +84,6 @@ export default function App() {
   // Watchlist states
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [searchDramaQuery, setSearchDramaQuery] = useState('');
   
   // Form states for new watch item
   const [newTitle, setNewTitle] = useState('');
@@ -353,7 +323,11 @@ export default function App() {
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+      <main className={`flex-1 w-full flex flex-col transition-all duration-150 ${
+        activeTab === 'browse' 
+          ? 'h-[calc(100vh-48px)] min-h-[calc(100vh-48px)] max-h-[calc(100vh-48px)] overflow-hidden p-0' 
+          : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6'
+      }`}>
         
         {/* VIEW ROUTING (TABS CONTENT) */}
         <AnimatePresence mode="wait">
@@ -362,28 +336,28 @@ export default function App() {
           {activeTab === 'browse' && (
             <motion.div
               key="browse"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full h-full flex flex-col overflow-hidden flex-1"
             >
 
 
-              {/* TWO COLUMN GRID FOR BROWSE */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-6 gap-y-2">
+               {/* FULL-WIDTH VIEW FOR BROWSE */}
+              <div className="w-full h-full flex flex-col overflow-hidden flex-1">
                 
-                {/* COLUMN A: WEB VIEW IFRAME (2/3 width) */}
-                <div className={`lg:col-span-2 flex flex-col gap-2 transition-all duration-300 ${
+                {/* COLUMN A: WEB VIEW IFRAME (Full width) */}
+                <div className={`w-full h-full flex flex-col overflow-hidden transition-all duration-300 flex-1 bg-[#09090b] ${
                   isViewerSticky 
-                    ? 'fixed top-12 bottom-0 left-0 right-0 z-40 bg-[#09090b] p-0 gap-0' 
-                    : 'sticky top-[48px] z-30 bg-[#09090b] pb-0 self-start'
+                    ? 'fixed top-12 bottom-0 left-0 right-0 z-40 bg-[#09090b] p-0 gap-0 h-[calc(100vh-48px)]' 
+                    : ''
                 }`}>
                   {!isViewerSticky && (
-                    <div className="flex items-center justify-between px-4 sm:px-0">
+                    <div className="flex items-center justify-between px-4 py-2 bg-zinc-950 border-b border-zinc-900/60 shrink-0">
                       <div className="flex items-center gap-1.5">
                         <Tv className="w-3.5 h-3.5 text-rose-500" />
-                        <h2 className="text-xs md:text-sm font-bold text-zinc-300 uppercase tracking-wider">OTT 스트리밍 전용 뷰어</h2>
+                        <h2 className="text-xs md:text-sm font-bold text-zinc-300 uppercase tracking-wider">OTT 뷰어</h2>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] md:text-xs text-zinc-500 max-w-[120px] sm:max-w-[200px] md:max-w-none truncate">{currentUrl}</span>
@@ -401,42 +375,13 @@ export default function App() {
                   )}
 
                   {/* IFRAME WRAPPER BOX WITH UNIFIED CONTROL BAR */}
-                  <div className={`bg-zinc-950 overflow-hidden shadow-2xl relative w-full flex flex-col ${
+                  <div className={`bg-zinc-950 overflow-hidden relative w-full flex-1 flex flex-col min-h-0 ${
                     isViewerSticky 
                       ? 'h-full rounded-none border-none' 
-                      : 'rounded-2xl border border-zinc-800/80 h-[420px] sm:h-[580px] md:h-[780px] lg:h-[calc(100vh-140px)] lg:min-h-[550px] xl:min-h-[650px]'
+                      : 'border-t border-zinc-900/80'
                   }`}>
-                    
-                    {/* TVWiKi AD CROPPING TOOLBAR (ONLY FOR TVWIKI & VISIBLE AS SLIM BAR) */}
-                    {isTvWiki && (
-                      <div className="bg-zinc-900 border-b border-zinc-800 px-3 py-1.5 flex items-center justify-between gap-2 text-[11px] text-zinc-300 select-none z-20 relative">
-                        <div className="flex items-center gap-1 font-bold text-amber-400">
-                          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                          <span>광고차단</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-zinc-500 font-bold">오프셋:</span>
-                          <div className="flex bg-zinc-950 p-0.5 rounded-md border border-zinc-800/60">
-                            {[0, 180, 240, 300].map((offset) => (
-                              <button
-                                key={offset}
-                                type="button"
-                                onClick={() => setTvWikiOffset(offset)}
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                                  tvWikiOffset === offset 
-                                    ? 'bg-amber-500 text-zinc-950 font-extrabold' 
-                                    : 'text-zinc-400 hover:text-zinc-200'
-                                }`}
-                              >
-                                {offset === 0 ? '0px' : `${offset}px`}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
-                    <div className="overflow-hidden relative flex-1 w-full h-full bg-zinc-950">
+                    <div className="overflow-hidden relative flex-1 w-full min-h-0 bg-zinc-950">
                       {/* Loading & troubleshooting overlay */}
                       {iframeLoading && (
                         <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-10">
@@ -495,8 +440,7 @@ export default function App() {
                         title="Narto Drama Stream"
                         onLoad={() => setIframeLoading(false)}
                         style={{
-                          marginTop: currentUrl.includes('tvwiki.store') ? `-${tvWikiOffset}px` : '0px',
-                          height: currentUrl.includes('tvwiki.store') ? `calc(100% + ${tvWikiOffset}px)` : '100%',
+                          height: '100%',
                           width: '100%',
                           border: 'none',
                           position: 'absolute',
@@ -506,123 +450,13 @@ export default function App() {
                         className="bg-zinc-950"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
-                      />
+                    />
                     </div>
-                    
-                    {/* Visual cue when loaded */}
-                    {!isViewerSticky && (
-                      <div className="absolute bottom-3 right-3 bg-zinc-950/90 text-zinc-300 px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-800 backdrop-blur pointer-events-none">
-                        OTT 공식 임베디드 뷰어
-                      </div>
-                    )}
                   </div>
 
 
                 </div>
 
-                {/* COLUMN B: QUICK NAVIGATION / TRENDING / WATCHLIST SNIPPET (1/3 width) */}
-                <div className={`flex flex-col gap-6 ${isViewerSticky ? 'hidden md:flex' : 'flex'}`}>
-                  
-                  {/* SEARCH DEEP LINK */}
-                  <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 p-5 rounded-2xl border border-zinc-800/80 space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-rose-400" />
-                      <h3 className="text-sm font-bold text-zinc-200">나토드라마 직접 검색하기</h3>
-                    </div>
-                    <p className="text-xs text-zinc-400">
-                      원하는 드라마 이름을 치면 bilitv 한국어 번역 상태로 검색을 시작합니다.
-                    </p>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text"
-                        placeholder="예: 선재 업고 튀어, 더 글로리"
-                        value={searchDramaQuery}
-                        onChange={(e) => setSearchDramaQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && searchDramaQuery.trim()) {
-                            const searchUrl = `https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=${encodeURIComponent(searchDramaQuery.trim())}`;
-                            setCurrentUrl(searchUrl);
-                            // Set to iframe
-                            const iframe = document.getElementById('narto-iframe') as HTMLIFrameElement;
-                            if (iframe) iframe.src = searchUrl;
-                          }
-                        }}
-                        className="flex-1 bg-zinc-900 border border-zinc-800 focus:border-rose-500/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none transition duration-150"
-                      />
-                      <button 
-                        onClick={() => {
-                          if (searchDramaQuery.trim()) {
-                            const searchUrl = `https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv&search=${encodeURIComponent(searchDramaQuery.trim())}`;
-                            setCurrentUrl(searchUrl);
-                            const iframe = document.getElementById('narto-iframe') as HTMLIFrameElement;
-                            if (iframe) iframe.src = searchUrl;
-                          }
-                        }}
-                        className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-lg text-xs transition flex-shrink-0"
-                      >
-                        검색
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* TRENDING POPULAR DRAMAS */}
-                  <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 p-5 rounded-2xl border border-zinc-800/80 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-rose-500" />
-                        <h3 className="text-sm font-bold text-zinc-200">화제의 드라마 빠른 링크</h3>
-                      </div>
-                      <span className="text-[10px] bg-rose-500/10 text-rose-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">bilitv</span>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      {TRENDING_DRAMAS.map((drama) => (
-                        <div 
-                          key={drama.id}
-                          className="group bg-zinc-900/50 hover:bg-zinc-900 p-3 rounded-xl border border-zinc-800/40 hover:border-zinc-700/60 transition duration-200 text-left"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="space-y-0.5">
-                              <h4 className="text-xs font-bold text-white group-hover:text-rose-400 transition-colors duration-150">
-                                {drama.title}
-                              </h4>
-                              <p className="text-[10px] text-zinc-400">{drama.genre}</p>
-                            </div>
-                            <span className="text-[10px] font-bold text-amber-400 bg-amber-400/5 px-1.5 py-0.5 rounded border border-amber-400/20">
-                              ★ {drama.stars}
-                            </span>
-                          </div>
-                          
-                          <p className="text-[10px] text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">
-                            {drama.desc}
-                          </p>
-                          
-                          <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-zinc-800/50">
-                            <span className="text-[9px] text-zinc-500">{drama.episodes}</span>
-                            <button 
-                              onClick={() => {
-                                setCurrentUrl(drama.biliTvUrl);
-                                const iframe = document.getElementById('narto-iframe') as HTMLIFrameElement;
-                                if (iframe) iframe.src = drama.biliTvUrl;
-                              }}
-                              className="text-[10px] text-rose-400 group-hover:text-rose-300 font-bold flex items-center gap-0.5"
-                            >
-                              <span>지금 시청하기</span>
-                              <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-150" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* QUICK STATS */}
-                  <div className="bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/40 text-center">
-                    <p className="text-[11px] text-zinc-400">현재 선택된 자막 설정</p>
-                    <p className="text-xs font-bold text-white mt-1">한국어 (ko-KR) / BiliTV 자막 재생</p>
-                  </div>
-
-                </div>
               </div>
 
             </motion.div>
