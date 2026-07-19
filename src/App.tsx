@@ -483,7 +483,7 @@ export default function App() {
                 {/* COLUMN A: WEB VIEW IFRAME (2/3 width) */}
                 <div className={`lg:col-span-2 flex flex-col gap-3 transition-all duration-300 ${
                   isViewerSticky 
-                    ? 'fixed top-12 bottom-[58px] left-0 right-0 z-40 bg-[#09090b] p-0 gap-0' 
+                    ? 'fixed top-12 bottom-[44px] left-0 right-0 z-40 bg-[#09090b] p-0 gap-0' 
                     : 'sticky top-[48px] md:relative md:top-auto z-30 bg-[#09090b] pb-2'
                 }`}>
                   {!isViewerSticky && (
@@ -1171,28 +1171,28 @@ export default function App() {
       </main>
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className={`z-50 md:hidden bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/80 py-2.5 px-4 pb-safe transition-all duration-300 ${
+      <nav className={`z-50 md:hidden bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/80 py-1.5 px-3 pb-safe transition-all duration-300 ${
         isViewerSticky ? 'fixed bottom-0 left-0 right-0' : 'sticky bottom-0'
       }`}>
         <div className="flex items-center justify-around">
           <button 
             onClick={() => setActiveTab('browse')}
-            className={`flex flex-col items-center gap-1 transition ${activeTab === 'browse' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
+            className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'browse' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
             id="tab-browse-mobile"
           >
-            <Tv className="w-5 h-5" />
-            <span className="text-[10px]">시청 & 재생기</span>
+            <Tv className="w-4 h-4" />
+            <span className="text-[9px]">시청 & 재생기</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('watchlist')}
-            className={`flex flex-col items-center gap-1 transition relative ${activeTab === 'watchlist' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
+            className={`flex flex-col items-center gap-0.5 transition relative ${activeTab === 'watchlist' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
             id="tab-watchlist-mobile"
           >
-            <Bookmark className="w-5 h-5" />
-            <span className="text-[10px]">마이 북마크</span>
+            <Bookmark className="w-4 h-4" />
+            <span className="text-[9px]">마이 북마크</span>
             {watchlist.length > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] px-1 rounded-full font-bold">
+              <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[8px] px-1 rounded-full font-bold">
                 {watchlist.length}
               </span>
             )}
@@ -1200,22 +1200,22 @@ export default function App() {
 
           <button 
             onClick={() => setActiveTab('guide')}
-            className={`flex flex-col items-center gap-1 transition ${activeTab === 'guide' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
+            className={`flex flex-col items-center gap-0.5 transition ${activeTab === 'guide' ? 'text-rose-400 font-semibold' : 'text-zinc-500'}`}
             id="tab-guide-mobile"
           >
-            <Download className="w-5 h-5" />
-            <span className="text-[10px]">앱 설치</span>
+            <Download className="w-4 h-4" />
+            <span className="text-[9px]">앱 설치</span>
           </button>
 
           <a 
             href="https://tvwiki.store/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 text-amber-400 transition"
+            className="flex flex-col items-center gap-0.5 text-amber-400 transition"
             id="link-tvwiki-mobile"
           >
-            <ExternalLink className="w-5 h-5" />
-            <span className="text-[10px]">TVWiKi</span>
+            <ExternalLink className="w-4 h-4" />
+            <span className="text-[9px]">TVWiKi</span>
           </a>
         </div>
       </nav>
@@ -1238,21 +1238,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
-      {/* FLOATING RESTORE BUTTON FOR STICKY MOBILE VIEW */}
-      {isViewerSticky && (
-        <button
-          onClick={() => {
-            setIsViewerSticky(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="fixed bottom-20 right-4 z-50 flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-full px-4 py-2.5 text-xs shadow-lg shadow-rose-500/30 transition-all duration-200 animate-bounce"
-          id="restore-normal-view-btn"
-        >
-          <Smartphone className="w-4 h-4" />
-          <span>일반화면 보기</span>
-        </button>
-      )}
 
     </div>
   );
