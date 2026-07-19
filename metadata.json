@@ -1,0 +1,6 @@
+{
+  "name": "나토드라마 PWA",
+  "description": "나토드라마(narto-drama.com)를 앱처럼 편리하게 홈 화면에 설치하고 이용할 수 있는 공식 PWA 설치형 웹앱입니다. bilitv 한글 자막 드라마를 빠르고 쾌적하게 감상하세요.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

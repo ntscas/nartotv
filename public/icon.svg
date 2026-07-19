@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Definitions for gradients and shadows -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e24" />
+      <stop offset="50%" stop-color="#0f0f12" />
+      <stop offset="100%" stop-color="#050507" />
+    </linearGradient>
+    <linearGradient id="primaryGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="60%" stop-color="#db2777" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffedd5" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle (Safe Zone Maskable) -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  
+  <!-- Glowing subtle backdrop -->
+  <circle cx="256" cy="256" r="180" fill="url(#glowGrad)" />
+
+  <!-- Outer Ring with Gradient -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="url(#primaryGrad)" stroke-width="8" opacity="0.6" />
+
+  <!-- Drama Play Ribbon Icon -->
+  <g transform="translate(146, 146)">
+    <!-- Base Ribbon/Shape -->
+    <path d="M 40,30 L 180,30 C 200,30 210,45 200,60 L 130,150 C 120,165 100,165 90,150 L 20,60 C 10,45 20,30 40,30 Z" fill="url(#primaryGrad)" filter="url(#glow)" />
+    <!-- White Neon Accent Drama Play button -->
+    <path d="M 90,65 L 145,100 L 90,135 Z" fill="#ffffff" />
+    <!-- Soft inner overlay for depth -->
+    <circle cx="110" cy="100" r="40" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.15" />
+  </g>
+
+  <!-- Title Monogram Text -->
+  <text x="256" y="415" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="4" text-anchor="middle">NARTO</text>
+  <text x="256" y="450" font-family="'Inter', system-ui, sans-serif" font-weight="600" font-size="24" fill="#f43f5e" letter-spacing="2" text-anchor="middle">DRAMA PWA</text>
+</svg>
