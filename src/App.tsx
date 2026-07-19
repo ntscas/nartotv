@@ -223,7 +223,7 @@ export default function App() {
       <header className={`sticky top-0 transition-all duration-300 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-900/80 ${
         isViewerSticky ? 'z-50' : 'z-40'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between gap-4">
+        <div className="w-full px-4 md:px-6 h-12 flex items-center justify-between gap-4">
           <div 
             onClick={() => {
               setCurrentUrl(defaultUrl);
