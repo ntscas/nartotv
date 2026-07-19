@@ -76,7 +76,7 @@ const TRENDING_DRAMAS = [
 ];
 
 export default function App() {
-  const defaultUrl = 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv';
+  const defaultUrl = 'https://narto-drama.com/?lang=ko-KR';
   const [currentUrl, setCurrentUrl] = useState(defaultUrl);
   const [tvWikiOffset, setTvWikiOffset] = useState<number>(180); // Default 180px
   const [activeTab, setActiveTab] = useState<'browse' | 'watchlist'>('browse');
@@ -404,7 +404,7 @@ export default function App() {
                   <div className={`bg-zinc-950 overflow-hidden shadow-2xl relative w-full flex flex-col ${
                     isViewerSticky 
                       ? 'h-full rounded-none border-none' 
-                      : 'rounded-2xl border border-zinc-800/80 h-[420px] sm:h-[580px] md:h-[780px] lg:h-[880px] xl:h-[980px]'
+                      : 'rounded-2xl border border-zinc-800/80 h-[420px] sm:h-[580px] md:h-[780px] lg:h-[calc(100vh-140px)] lg:min-h-[550px] xl:min-h-[650px]'
                   }`}>
                     
                     {/* TVWiKi AD CROPPING TOOLBAR (ONLY FOR TVWIKI & VISIBLE AS SLIM BAR) */}
@@ -887,25 +887,6 @@ export default function App() {
         </AnimatePresence>
 
       </main>
-
-      {/* FOOTER SECTION */}
-      <footer className={`bg-zinc-950 border-t border-zinc-900 py-8 text-center text-zinc-600 text-xs mt-4 ${isViewerSticky ? 'hidden md:block' : 'block'}`}>
-        <div className="max-w-7xl mx-auto px-4 space-y-3">
-          <p className="font-semibold tracking-wider text-zinc-500">OTT 프리미엄 웹 뷰어</p>
-          <p className="max-w-md mx-auto leading-relaxed text-zinc-600">
-            본 앱은 https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv 공식 주소 연결 및 스마트 오프셋 필터 기능을 제공하는 웹 서비스입니다.
-          </p>
-          <div className="flex items-center justify-center gap-4 text-[11px] pt-2">
-            <a href="https://narto-drama.com/" target="_blank" rel="noreferrer" className="hover:text-rose-400 transition">OTT 공식홈</a>
-            <span>•</span>
-            <button type="button" onClick={loadTvWikiInViewer} className="text-amber-400 hover:text-amber-300 transition font-semibold cursor-pointer">TVWiKi 로드</button>
-            <span>•</span>
-            <button type="button" onClick={() => setCurrentUrl(defaultUrl)} className="hover:text-rose-400 transition">bilitv 한글 필터 링크</button>
-            <span>•</span>
-            <span>Version 1.1.0</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
