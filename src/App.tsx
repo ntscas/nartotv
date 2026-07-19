@@ -82,6 +82,19 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'browse' | 'watchlist'>('browse');
   const [isViewerSticky, setIsViewerSticky] = useState(false);
   const isTvWiki = currentUrl.includes('tvwiki.store');
+  const [iframeLoading, setIframeLoading] = useState(true);
+  const [showSlowWarning, setShowSlowWarning] = useState(false);
+
+  useEffect(() => {
+    setIframeLoading(true);
+    setShowSlowWarning(false);
+    
+    const timer = setTimeout(() => {
+      setShowSlowWarning(true);
+    }, 3500);
+    
+    return () => clearTimeout(timer);
+  }, [currentUrl]);
 
   const loadTvWikiInViewer = () => {
     const tvWikiUrl = 'https://tvwiki.store/';
@@ -372,7 +385,18 @@ export default function App() {
                         <Tv className="w-3.5 h-3.5 text-rose-500" />
                         <h2 className="text-xs md:text-sm font-bold text-zinc-300 uppercase tracking-wider">OTT 스트리밍 전용 뷰어</h2>
                       </div>
-                      <span className="text-[10px] md:text-xs text-zinc-500 max-w-[200px] sm:max-w-none truncate">{currentUrl}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] md:text-xs text-zinc-500 max-w-[120px] sm:max-w-[200px] md:max-w-none truncate">{currentUrl}</span>
+                        <a 
+                          href={currentUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2 py-1 rounded-md border border-rose-500/20 transition cursor-pointer"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" />
+                          <span>새 창으로 시청</span>
+                        </a>
+                      </div>
                     </div>
                   )}
 
@@ -412,11 +436,64 @@ export default function App() {
                       </div>
                     )}
 
-                    <div className="overflow-hidden relative flex-1 w-full h-full">
+                    <div className="overflow-hidden relative flex-1 w-full h-full bg-zinc-950">
+                      {/* Loading & troubleshooting overlay */}
+                      {iframeLoading && (
+                        <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center z-10">
+                          <div className="flex flex-col items-center gap-4 max-w-sm sm:max-w-md">
+                            {/* Animated modern spinner */}
+                            <div className="relative">
+                              <div className="w-12 h-12 rounded-full border-4 border-rose-500/10 border-t-rose-500 animate-spin" />
+                              <Tv className="w-5 h-5 text-rose-400 absolute inset-0 m-auto animate-pulse" />
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <p className="text-sm font-bold text-zinc-200">콘텐츠 웹사이트에 연결하고 있습니다...</p>
+                              <p className="text-xs text-zinc-500">잠시만 기다려 주시면 화면이 로드됩니다.</p>
+                            </div>
+
+                            {/* Show troubleshooting warning when taking too long */}
+                            {showSlowWarning && (
+                              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mt-2 space-y-3 shadow-lg shadow-black/40 text-left">
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                  💡 <b>화면 로드가 너무 오래 걸리나요?</b><br />
+                                  일부 모바일 및 PC 브라우저의 프레임 차단 보안 쿠키 정책으로 인해 내부 로드가 불가능하거나 검은색으로 멈출 수 있습니다. 이 경우 아래 <b>[새 창으로 시청]</b>을 이용하시면 차단 걱정 없이 가장 빠른 고화질 재생이 가능합니다!
+                                </p>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                  <a
+                                    href={currentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                    <span>새 창으로 시청하기</span>
+                                  </a>
+                                  <button
+                                    onClick={() => {
+                                      setIframeLoading(true);
+                                      setShowSlowWarning(false);
+                                      const iframe = document.getElementById('narto-iframe') as HTMLIFrameElement;
+                                      if (iframe) {
+                                        iframe.src = currentUrl;
+                                      }
+                                    }}
+                                    className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold px-3.5 py-2 rounded-lg transition"
+                                  >
+                                    <span>새로고침</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <iframe 
                         id="narto-iframe"
                         src={currentUrl}
                         title="Narto Drama Stream"
+                        onLoad={() => setIframeLoading(false)}
                         style={{
                           marginTop: currentUrl.includes('tvwiki.store') ? `-${tvWikiOffset}px` : '0px',
                           height: currentUrl.includes('tvwiki.store') ? `calc(100% + ${tvWikiOffset}px)` : '100%',
