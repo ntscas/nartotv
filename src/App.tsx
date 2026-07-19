@@ -79,6 +79,7 @@ export default function App() {
   const defaultUrl = 'https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv';
   const [currentUrl, setCurrentUrl] = useState(defaultUrl);
   const [activeTab, setActiveTab] = useState<'browse' | 'watchlist' | 'guide'>('browse');
+  const [isViewerSticky, setIsViewerSticky] = useState(false);
   
   // PWA Install Prompt states
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -148,6 +149,42 @@ export default function App() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  // Handle auto-sticky full screen viewer on mobile scroll
+  useEffect(() => {
+    // If already sticky, do not run scroll check to prevent layout change feedback loops (flickering)
+    if (isViewerSticky) return;
+
+    const handleScroll = () => {
+      // Only run on mobile viewports (< 768px)
+      if (window.innerWidth >= 768) return;
+
+      // When the user scrolls past 100px on mobile, trigger full screen mode automatically
+      if (window.scrollY > 100) {
+        setIsViewerSticky(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isViewerSticky]);
+
+  // Reset viewer sticky state when tab changes
+  useEffect(() => {
+    setIsViewerSticky(false);
+  }, [activeTab]);
+
+  // Lock parent body scroll in mobile sticky immersive mode to prevent double-scroll & jitter
+  useEffect(() => {
+    if (isViewerSticky) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isViewerSticky]);
 
   // Save watchlist helper
   const saveWatchlist = (updatedList: WatchlistItem[]) => {
@@ -245,18 +282,20 @@ export default function App() {
       <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* HEADER SECTION */}
-      <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/60 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-violet-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
-              <Tv className="w-5 h-5 text-white stroke-[2.5]" />
+      <header className={`sticky top-0 transition-all duration-300 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/60 ${
+        isViewerSticky ? 'z-50' : 'z-40'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 md:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-tr from-rose-500 to-violet-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
+              <Tv className="w-4 h-4 md:w-5 md:h-5 text-white stroke-[2.5]" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg tracking-wider bg-gradient-to-r from-rose-400 to-pink-500 bg-clip-text text-transparent">나토드라마</span>
-                <span className="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">PWA</span>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="font-extrabold text-sm sm:text-base md:text-lg tracking-wider bg-gradient-to-r from-rose-400 to-pink-500 bg-clip-text text-transparent">나토드라마</span>
+                <span className="text-[8px] md:text-[10px] uppercase tracking-widest px-1 md:px-1.5 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">PWA</span>
               </div>
-              <p className="text-[10px] text-zinc-500 font-medium">BiliTV 자막지원 스트리밍</p>
+              <p className="text-[8px] md:text-[10px] text-zinc-500 font-medium">BiliTV 자막지원 스트리밍</p>
             </div>
           </div>
 
@@ -296,20 +335,37 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Mobile Immersive Screen Toggle */}
+            <button
+              onClick={() => {
+                if (isViewerSticky) {
+                  setIsViewerSticky(false);
+                  window.scrollTo({ top: 0, behavior: 'instant' });
+                } else {
+                  setIsViewerSticky(true);
+                }
+              }}
+              className="md:hidden flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700/80 font-bold rounded-lg px-2.5 py-1 text-[10px] active:scale-95 transition-all"
+              id="mobile-immersive-toggle"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-rose-400" />
+              <span>{isViewerSticky ? '일반화면' : '몰입화면'}</span>
+            </button>
+
             {/* Install Status badge or quick trigger */}
             {isInstalled ? (
-              <div className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 text-xs font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>앱으로 실행 중</span>
+              <div className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-xs font-semibold">
+                <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                <span>실행 중</span>
               </div>
             ) : (
               <button 
                 onClick={handleInstallPWA}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-lg px-4 py-2 text-xs shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 transition-all duration-200"
+                className="flex items-center gap-1 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-lg px-2 py-1 md:px-4 md:py-2 text-[10px] md:text-xs shadow-md shadow-rose-500/10 hover:shadow-rose-500/20 transition-all duration-200"
                 id="install-btn-header"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>앱 설치하기</span>
+                <Download className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                <span>앱 설치</span>
               </button>
             )}
           </div>
@@ -371,7 +427,9 @@ export default function App() {
               className="flex flex-col gap-6"
             >
               {/* BRAND PROMOTION BANNER */}
-              <div className="bg-gradient-to-r from-zinc-900 via-[#121215] to-zinc-950 rounded-2xl p-5 sm:p-6 border border-zinc-800/80 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden relative">
+              <div className={`bg-gradient-to-r from-zinc-900 via-[#121215] to-zinc-950 rounded-2xl p-5 sm:p-6 border border-zinc-800/80 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden relative ${
+                isViewerSticky ? 'hidden md:flex' : 'flex'
+              }`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-[80px] pointer-events-none" />
                 <div className="space-y-2 max-w-2xl">
                   <div className="flex items-center gap-2 text-rose-400 text-xs font-bold tracking-wider uppercase">
@@ -423,49 +481,61 @@ export default function App() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* COLUMN A: WEB VIEW IFRAME (2/3 width) */}
-                <div className="lg:col-span-2 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-                      <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">나토드라마 스트리밍 전용 뷰어</h2>
+                <div className={`lg:col-span-2 flex flex-col gap-3 transition-all duration-300 ${
+                  isViewerSticky 
+                    ? 'fixed top-12 bottom-[58px] left-0 right-0 z-40 bg-[#09090b] p-0 gap-0' 
+                    : 'sticky top-[48px] md:relative md:top-auto z-30 bg-[#09090b] pb-2'
+                }`}>
+                  {!isViewerSticky && (
+                    <div className="flex items-center justify-between px-4 sm:px-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+                        <h2 className="text-xs md:text-sm font-bold text-zinc-300 uppercase tracking-wider">나토드라마 스트리밍 전용 뷰어</h2>
+                      </div>
+                      <span className="text-[10px] md:text-xs text-zinc-500 max-w-[200px] sm:max-w-none truncate">{currentUrl}</span>
                     </div>
-                    <span className="text-xs text-zinc-500 max-w-[200px] sm:max-w-none truncate">{currentUrl}</span>
-                  </div>
+                  )}
 
                   {/* IFRAME WRAPPER BOX WITH FALLBACK INFO */}
-                  <div className="bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden shadow-2xl relative h-[850px] sm:h-[900px] md:h-[650px] lg:h-[750px] xl:h-[800px] w-full flex flex-col">
+                  <div className={`bg-zinc-950 overflow-hidden shadow-2xl relative w-full flex flex-col ${
+                    isViewerSticky 
+                      ? 'h-full rounded-none border-none' 
+                      : 'rounded-2xl border border-zinc-800/80 h-[320px] sm:h-[450px] md:h-[650px] lg:h-[750px] xl:h-[800px]'
+                  }`}>
                     
                     {/* Fallback & Helper Banner over iframe or as a head/footer */}
-                    <div className="bg-zinc-900 px-4 py-2 text-xs border-b border-zinc-800 flex items-center justify-between text-zinc-400 gap-4">
-                      <div className="flex items-center gap-1.5 overflow-hidden">
-                        <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                        <span className="truncate">
-                          화면 차단 시 외부 전용창을 이용하세요. 또는 
-                          <a href="https://tvwiki.store/" target="_blank" rel="noreferrer" className="text-amber-400 font-bold ml-1 hover:underline">TVWiKi 바로가기</a>
-                        </span>
+                    {!isViewerSticky && (
+                      <div className="bg-zinc-900 px-4 py-2 text-xs border-b border-zinc-800 flex items-center justify-between text-zinc-400 gap-4">
+                        <div className="flex items-center gap-1.5 overflow-hidden">
+                          <Info className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                          <span className="truncate">
+                            화면 차단 시 외부 전용창을 이용하세요. 또는 
+                            <a href="https://tvwiki.store/" target="_blank" rel="noreferrer" className="text-amber-400 font-bold ml-1 hover:underline">TVWiKi 바로가기</a>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <a 
+                            href="https://tvwiki.store/" 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-amber-400 font-bold hover:underline flex items-center gap-0.5"
+                          >
+                            <span>TVWiKi</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                          <span className="text-zinc-700">|</span>
+                          <a 
+                            href={currentUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-rose-400 font-bold hover:underline flex items-center gap-0.5"
+                          >
+                            <span>외부 전용창</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <a 
-                          href="https://tvwiki.store/" 
-                          target="_blank" 
-                          rel="noreferrer" 
-                          className="text-amber-400 font-bold hover:underline flex items-center gap-0.5"
-                        >
-                          <span>TVWiKi 열기</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                        <span className="text-zinc-700">|</span>
-                        <a 
-                          href={currentUrl} 
-                          target="_blank" 
-                          rel="noreferrer" 
-                          className="text-rose-400 font-bold hover:underline flex items-center gap-0.5"
-                        >
-                          <span>외부 전용창 열기</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    </div>
+                    )}
 
                     <iframe 
                       id="narto-iframe"
@@ -477,33 +547,37 @@ export default function App() {
                     />
                     
                     {/* Visual cue when loaded */}
-                    <div className="absolute bottom-3 right-3 bg-zinc-950/90 text-zinc-300 px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-800 backdrop-blur pointer-events-none">
-                      나토드라마 공식 임베디드 뷰어
-                    </div>
+                    {!isViewerSticky && (
+                      <div className="absolute bottom-3 right-3 bg-zinc-950/90 text-zinc-300 px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-800 backdrop-blur pointer-events-none">
+                        나토드라마 공식 임베디드 뷰어
+                      </div>
+                    )}
                   </div>
 
                   {/* QUICK ACCESS BUTTONS */}
-                  <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-zinc-300">동작이 원활하지 않으신가요?</h4>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        모바일이나 PC 브라우저의 보안 정책으로 인해 페이지 내 프레임 로드가 차단되는 경우가 있습니다. 이 경우 PWA를 설치하여 실행하거나 바로가기로 실행하시면 차단 없이 완벽하게 동작합니다!
-                      </p>
+                  {!isViewerSticky && (
+                    <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-bold text-zinc-300">동작이 원활하지 않으신가요?</h4>
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          모바일이나 PC 브라우저의 보안 정책으로 인해 페이지 내 프레임 로드가 차단되는 경우가 있습니다. 이 경우 PWA를 설치하여 실행하거나 바로가기로 실행하시면 차단 없이 완벽하게 동작합니다!
+                        </p>
+                      </div>
+                      <a 
+                        href="https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2.5 rounded-lg border border-zinc-700/80 text-xs transition-all flex-shrink-0"
+                      >
+                        <span>나토드라마 바로 연결하기</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
                     </div>
-                    <a 
-                      href="https://narto-drama.com/?lang=ko-KR&tab-provider=bilitv"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-4 py-2.5 rounded-lg border border-zinc-700/80 text-xs transition-all flex-shrink-0"
-                    >
-                      <span>나토드라마 바로 연결하기</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
+                  )}
                 </div>
 
                 {/* COLUMN B: QUICK NAVIGATION / TRENDING / WATCHLIST SNIPPET (1/3 width) */}
-                <div className="flex flex-col gap-6">
+                <div className={`flex flex-col gap-6 ${isViewerSticky ? 'hidden md:flex' : 'flex'}`}>
                   
                   {/* SEARCH DEEP LINK */}
                   <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 p-5 rounded-2xl border border-zinc-800/80 space-y-4">
@@ -1097,7 +1171,9 @@ export default function App() {
       </main>
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="sticky bottom-0 z-40 md:hidden bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/80 py-2.5 px-4 pb-safe">
+      <nav className={`z-50 md:hidden bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/80 py-2.5 px-4 pb-safe transition-all duration-300 ${
+        isViewerSticky ? 'fixed bottom-0 left-0 right-0' : 'sticky bottom-0'
+      }`}>
         <div className="flex items-center justify-around">
           <button 
             onClick={() => setActiveTab('browse')}
@@ -1145,7 +1221,7 @@ export default function App() {
       </nav>
 
       {/* FOOTER SECTION */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 py-8 text-center text-zinc-600 text-xs mt-12">
+      <footer className={`bg-zinc-950 border-t border-zinc-900 py-8 text-center text-zinc-600 text-xs mt-12 ${isViewerSticky ? 'hidden md:block' : 'block'}`}>
         <div className="max-w-7xl mx-auto px-4 space-y-3">
           <p className="font-semibold tracking-wider text-zinc-500">나토드라마 PWA COMTABLE CLIENT</p>
           <p className="max-w-md mx-auto leading-relaxed text-zinc-600">
@@ -1162,6 +1238,21 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* FLOATING RESTORE BUTTON FOR STICKY MOBILE VIEW */}
+      {isViewerSticky && (
+        <button
+          onClick={() => {
+            setIsViewerSticky(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="fixed bottom-20 right-4 z-50 flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-full px-4 py-2.5 text-xs shadow-lg shadow-rose-500/30 transition-all duration-200 animate-bounce"
+          id="restore-normal-view-btn"
+        >
+          <Smartphone className="w-4 h-4" />
+          <span>일반화면 보기</span>
+        </button>
+      )}
 
     </div>
   );
