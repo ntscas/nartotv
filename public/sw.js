@@ -1,10 +1,9 @@
 const CACHE_NAME = 'narto-drama-pwa-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/?source=pwa',
-  '/index.html',
-  '/icon.svg',
-  '/manifest.json'
+  './',
+  './index.html',
+  './icon.svg',
+  './manifest.json'
 ];
 
 // Install Service Worker and cache core shell resources
@@ -65,7 +64,7 @@ self.addEventListener('fetch', (event) => {
           }
           // Fallback to main page if navigation request
           if (event.request.mode === 'navigate') {
-            return caches.match('/?source=pwa') || caches.match('/');
+            return caches.match('./index.html') || caches.match('./');
           }
         });
       })
