@@ -41,7 +41,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<'browse' | 'watchlist'>('browse');
   const [isViewerSticky, setIsViewerSticky] = useState(false);
-  const isTvWiki = currentUrl.includes('tvwiki45.net                                       ');
+  const isTvWiki = currentUrl.includes('tvwiki47.net                                       ');
   const [iframeLoading, setIframeLoading] = useState(true);
   const [showSlowWarning, setShowSlowWarning] = useState(false);
 
@@ -68,7 +68,7 @@ export default function App() {
   }, [currentUrl]);
 
   const loadTvWikiInViewer = () => {
-    const tvWikiUrl = 'https://tvwiki45.net/';
+    const tvWikiUrl = 'https://tvwiki47.net/';
     setCurrentUrl(tvWikiUrl);
     setActiveTab('browse');
     
